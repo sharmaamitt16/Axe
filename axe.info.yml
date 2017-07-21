@@ -1,0 +1,5 @@
+name: Axe Assignment
+type: module
+description: Alter site information page and add API key.
+package: Dev
+core: 8.x

@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Module file for axe.
+ */
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function axe_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.axe':
+      $output = '';
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This module provides API key field on system site information page.') . '</p>';
+      $output .= '<p>' . t('Also it provides json output of page type node after being provided appropriate apikey and nodeid.') . '</p>';
+
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function axe_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $site_api_key = \Drupal::config('system.site')->get('siteapikey');
+
+    $form['siteapi'] = [
+      '#type' => 'details',
+      '#title' => t('API Key Settings'),
+      '#open' => TRUE,
+    ];
+
+    $form['siteapi']['siteapikey'] = [
+      '#type' => 'textfield',
+      '#title' => t('Site API Key'),
+      '#placeholder' => 'No API Key yet',
+      '#description' => t('Configure site api key.'),
+      '#default_value' => $site_api_key,
+    ];
+
+    if (!empty($site_api_key)) {
+      $form['actions']['submit']['#value'] = t('Update configuration');
+    }
+
+    $form['actions']['submit']['#submit'][] = '_axe_form_submit';
+  }
+}
+
+/**
+ * Form API callback.
+ * Ensures that site API key has been saved.
+ * This function is assigned as a #submit callback in hook_form_alter().
+ */
+function _axe_form_submit($form, FormStateInterface $form_state) {
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $site_api_key = $form_state->getValue('siteapikey');
+
+  $config->set('siteapikey', $site_api_key);
+  $config->save(TRUE);
+
+  if (!empty($site_api_key)) {
+    drupal_set_message(t('Site API key has been saved. Your site API key is %api', [
+      '%api' => $site_api_key,
+    ]));
+  }
+}

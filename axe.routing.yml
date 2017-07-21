@@ -1,0 +1,8 @@
+axe.api_call:
+  path: '/page_json/{apikey}/{nid}'
+  defaults:
+    _controller: '\Drupal\axe\Controller\SiteApiController::apiCallAction'
+    title: 'Site API call'        
+  requirements:
+    _permission: 'access content'    
+  
